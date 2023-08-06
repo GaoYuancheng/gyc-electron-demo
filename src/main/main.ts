@@ -12,9 +12,10 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
 import Store from 'electron-store';
+import MenuBuilder from './menu';
+import TrayBuilder from './tray';
+import { resolveHtmlPath } from './util';
 
 class AppUpdater {
   constructor() {
@@ -104,12 +105,26 @@ const createWindow = async () => {
     }
   });
 
+  mainWindow.on('close', (e) => {
+    e.preventDefault();
+    mainWindow?.hide();
+    console.log('e close', e);
+  });
+
   mainWindow.on('closed', () => {
+    console.log('closed');
     mainWindow = null;
   });
 
+  // 顶栏菜单
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
+
+  // 托盘菜单
+  const trayBuilder = new TrayBuilder(app, mainWindow, {
+    iconPath: getAssetPath('icon.png'),
+  });
+  trayBuilder.buildTray();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -125,6 +140,11 @@ const createWindow = async () => {
 /**
  * Add event listeners...
  */
+
+app.on('before-quit', (e) => {
+  // e.preventDefault();
+  console.log('e before-quit', e);
+});
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even

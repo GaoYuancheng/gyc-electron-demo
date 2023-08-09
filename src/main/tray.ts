@@ -30,13 +30,6 @@ class TrayBuilder {
       { label: 'radio', type: 'radio', checked: true },
       { label: 'radio1', type: 'radio' },
       {
-        label: 'normal',
-        type: 'normal',
-        click: () => {
-          this.app.exit();
-        },
-      },
-      {
         label: 'submenu',
         submenu: [
           {
@@ -44,6 +37,13 @@ class TrayBuilder {
             type: 'normal',
           },
         ],
+      },
+      {
+        label: 'quit(normal)',
+        type: 'normal',
+        click: () => {
+          this.app.exit();
+        },
       },
     ]);
     tray.setToolTip('This is my application.');

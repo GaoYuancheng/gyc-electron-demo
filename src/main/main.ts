@@ -28,19 +28,6 @@ class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 const store = new Store();
-// IPC listener
-ipcMain.on('electron-store-get', async (event, val) => {
-  event.returnValue = store.get(val);
-});
-ipcMain.on('electron-store-set', async (event, key, val) => {
-  store.set(key, val);
-});
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -150,7 +137,7 @@ app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {
-    app.quit();
+    app.exit();
   }
 });
 
@@ -165,3 +152,35 @@ app
     });
   })
   .catch(console.log);
+
+ipcMain.on('set-mainWindow-size', async (event, args) => {
+  mainWindow?.setBounds(args);
+});
+// IPC listener
+ipcMain.on('electron-store-get', async (event, val) => {
+  event.returnValue = store.get(val);
+});
+ipcMain.on('electron-store-set', async (event, key, val) => {
+  store.set(key, val);
+});
+
+ipcMain.on('ipc-example', async (event, arg) => {
+  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
+  console.log(msgTemplate(arg));
+  event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on('get-osInfo', async (event, arg) => {
+  const os = require('os');
+  event.reply('get-osInfo', {
+    hostname: os.hostname(),
+    type: os.type(),
+    platform: os.platform(),
+  });
+});
+
+ipcMain.on('save-file', async (event, arg) => {
+  const { fileUrl, fileContent } = arg;
+  const fs = require('fs');
+  fs.writeFileSync(fileUrl, fileContent);
+});

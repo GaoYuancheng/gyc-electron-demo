@@ -8,7 +8,9 @@ export type Channels =
   | 'ipc-example'
   | 'set-mainWindow-size'
   | 'get-appPath'
-  | 'get-filePath';
+  | 'get-filePath'
+  | 'close-app'
+  | 'open-closeModal';
 
 const electronHandler = {
   // 全局store

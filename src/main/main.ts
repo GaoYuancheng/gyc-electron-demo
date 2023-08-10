@@ -79,7 +79,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -95,13 +95,12 @@ const createWindow = async () => {
 
   // 关闭时缩小到托盘
   //  开发环境开启会影响热更新
-  if (!isDebug) {
-    mainWindow.on('close', (e) => {
-      e.preventDefault();
-      mainWindow?.hide();
-      console.log('e close', e);
-    });
-  }
+  mainWindow.on('close', (e) => {
+    e.preventDefault();
+    // mainWindow?.hide();
+    mainWindow?.webContents.send('open-closeModal');
+    console.log('e close', e);
+  });
 
   mainWindow.on('closed', () => {
     console.log('closed');
@@ -203,4 +202,14 @@ ipcMain.on('get-filePath', async (event, arg) => {
     properties: ['createDirectory', 'openDirectory', 'multiSelections'],
   });
   event.reply('get-filePath', fileUrlRes);
+});
+
+ipcMain.on('close-app', async (event, arg) => {
+  console.log('close-app', arg);
+  const { type } = arg;
+  if (type === 'hide') {
+    mainWindow?.hide();
+  } else if (type === 'exit') {
+    app.exit();
+  }
 });

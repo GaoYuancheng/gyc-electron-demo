@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import Store from 'electron-store';
@@ -79,6 +79,7 @@ const createWindow = async () => {
     },
   });
 
+  mainWindow.webContents.openDevTools();
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -92,11 +93,15 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.on('close', (e) => {
-    e.preventDefault();
-    mainWindow?.hide();
-    console.log('e close', e);
-  });
+  // 关闭时缩小到托盘
+  //  开发环境开启会影响热更新
+  if (!isDebug) {
+    mainWindow.on('close', (e) => {
+      e.preventDefault();
+      mainWindow?.hide();
+      console.log('e close', e);
+    });
+  }
 
   mainWindow.on('closed', () => {
     console.log('closed');
@@ -128,10 +133,10 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-app.on('before-quit', (e) => {
-  // e.preventDefault();
-  console.log('e before-quit', e);
-});
+// app.on('before-quit', (e) => {
+//   // e.preventDefault();
+//   console.log('e before-quit', e);
+// });
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
@@ -183,4 +188,19 @@ ipcMain.on('save-file', async (event, arg) => {
   const { fileUrl, fileContent } = arg;
   const fs = require('fs');
   fs.writeFileSync(fileUrl, fileContent);
+});
+
+ipcMain.on('get-appPath', async (event, arg) => {
+  event.reply('get-appPath', app.getPath(arg));
+});
+
+ipcMain.on('get-filePath', async (event, arg) => {
+  console.log('get-filePath', arg);
+  const { fileUrl } = arg;
+  const fileUrlRes = await dialog.showOpenDialog({
+    title: '选择文件',
+    defaultPath: fileUrl || '',
+    properties: ['createDirectory', 'openDirectory', 'multiSelections'],
+  });
+  event.reply('get-filePath', fileUrlRes);
 });

@@ -2,7 +2,13 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'set-mainWindow-size';
+export type Channels =
+  | 'get-osInfo'
+  | 'save-file'
+  | 'ipc-example'
+  | 'set-mainWindow-size'
+  | 'get-appPath'
+  | 'get-filePath';
 
 const electronHandler = {
   // 全局store

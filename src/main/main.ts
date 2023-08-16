@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  dialog,
+  Notification,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import Store from 'electron-store';
@@ -95,12 +102,14 @@ const createWindow = async () => {
 
   // 关闭时缩小到托盘
   //  开发环境开启会影响热更新
-  mainWindow.on('close', (e) => {
-    e.preventDefault();
-    // mainWindow?.hide();
-    mainWindow?.webContents.send('open-closeModal');
-    console.log('e close', e);
-  });
+  if (!isDebug) {
+    mainWindow.on('close', (e) => {
+      e.preventDefault();
+      // mainWindow?.hide();
+      mainWindow?.webContents.send('open-closeModal');
+      console.log('e close', e);
+    });
+  }
 
   mainWindow.on('closed', () => {
     console.log('closed');
@@ -149,6 +158,7 @@ app
   .whenReady()
   .then(() => {
     createWindow();
+
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
@@ -174,19 +184,30 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
-ipcMain.on('get-osInfo', async (event, arg) => {
+const getOsInfo = () => {
   const os = require('os');
-  event.reply('get-osInfo', {
+  return {
     hostname: os.hostname(),
     type: os.type(),
     platform: os.platform(),
-  });
+  };
+};
+
+ipcMain.on('get-osInfo', async (event, arg) => {
+  event.reply('get-osInfo', getOsInfo());
 });
 
 ipcMain.on('save-file', async (event, arg) => {
-  const { fileUrl, fileContent } = arg;
+  let { fileUrl, fileContent: resContent } = arg;
   const fs = require('fs');
-  fs.writeFileSync(fileUrl, fileContent);
+  if (!resContent) {
+    resContent = getOsInfo();
+  }
+  fs.writeFileSync(fileUrl, resContent);
+  event.reply('show-message', {
+    type: 'success',
+    text: `成功保存到${fileUrl}`,
+  });
 });
 
 ipcMain.on('get-appPath', async (event, arg) => {
@@ -212,4 +233,23 @@ ipcMain.on('close-app', async (event, arg) => {
   } else if (type === 'exit') {
     app.exit();
   }
+});
+
+ipcMain.on('send-notification', async (event, arg) => {
+  if (Notification.isSupported()) {
+    const notification = new Notification({
+      title: '新同志',
+    });
+    notification.show();
+    event.reply('show-message', {
+      type: 'success',
+      text: '操作成功',
+    });
+    return;
+  }
+
+  event.reply('show-message', {
+    type: 'error',
+    text: '此设备不支持通知',
+  });
 });

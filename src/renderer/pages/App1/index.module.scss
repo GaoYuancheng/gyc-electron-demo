@@ -1,9 +1,14 @@
 .app1 {
+  .content {
+    text-align: center;
+  }
   color: red;
   .cardArea {
+    margin-top: 30px;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    justify-content: center;
     .card {
       width: 40%;
     }

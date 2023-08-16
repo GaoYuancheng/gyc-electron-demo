@@ -10,7 +10,9 @@ export type Channels =
   | 'get-appPath'
   | 'get-filePath'
   | 'close-app'
-  | 'open-closeModal';
+  | 'open-closeModal'
+  | 'send-notification'
+  | 'show-message';
 
 const electronHandler = {
   // 全局store

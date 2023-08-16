@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { message } from 'antd';
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
@@ -11,3 +12,10 @@ window.electron.ipcRenderer.once('ipc-example', (arg) => {
   console.log(arg);
 });
 window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
+
+window.electron.ipcRenderer.on('show-message', (arg: any) => {
+  // eslint-disable-next-line no-console
+  console.log(arg);
+  const { type, text } = arg;
+  (message as any)[type](text);
+});

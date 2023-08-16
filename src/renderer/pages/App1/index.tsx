@@ -1,7 +1,7 @@
 import { Button, Card, Input, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.scss';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const list = [
   {
@@ -24,8 +24,9 @@ const list = [
 
 const App1: React.FC = () => {
   const userInfo = window.electron.store.get('userInfo');
+  const navigate = useNavigate();
 
-  const [osInfo, setOsInfo] = useState<any>({});
+  const [osInfo, setOsInfo] = useState<any>('');
   const [appPath, setAppPath] = useState<any>('');
   const [selectedFilePath, setSelectedFilePath] = useState<any>([]);
 
@@ -62,43 +63,60 @@ const App1: React.FC = () => {
     });
   };
 
+  const openNotification = () => {
+    window.electron.ipcRenderer.sendMessage('send-notification');
+  };
+
+  const logout = () => {
+    window.electron.store.set('userInfo', {});
+    navigate('/login');
+  };
+
   return (
     <div className={Styles.app1}>
-      <Link to="/login">返回登录页</Link>
-      <div>欢迎 {userInfo.username}</div>
-      <div className={Styles.cardArea}>
-        <Card className={Styles.card}>
-          <div>
-            <Button onClick={getOsInfo}>获取系统信息</Button>
-          </div>
-          <div>
-            {Object.keys(osInfo).map((key) => (
-              <div key={key}>{osInfo[key]}</div>
-            ))}
-          </div>
-        </Card>
-        <Card className={Styles.card}>
-          <Button onClick={saveFile}>导出文件到桌面</Button>
-        </Card>
-        <Card className={Styles.card}>
-          <div>
-            <Select onChange={getAppPath} style={{ width: 200 }}>
-              {list.map((item) => (
-                <Select.Option key={item.value}>{item.label}</Select.Option>
-              ))}
-            </Select>
-          </div>
-          <div>{appPath}</div>
-
-          <div>
-            <Button onClick={getFilePath}>获取文件路径</Button>
+      <div className={Styles.action}>
+        <a onClick={logout}>退出登录</a>
+      </div>
+      <div className={Styles.content}>
+        <div>欢迎 {userInfo.username}</div>
+        <div className={Styles.cardArea}>
+          <Card className={Styles.card} title="系统信息">
             <div>
-              {selectedFilePath.map((item: any) => (
-                <div key={item}>{item}</div>
-              ))}
+              <Button onClick={getOsInfo}>获取系统信息</Button>
             </div>
-          </div>
-        </Card>
+            <div>
+              {osInfo &&
+                Object.keys(osInfo).map((key) => (
+                  <div key={key}>{osInfo[key]}</div>
+                ))}
+            </div>
+          </Card>
+          <Card className={Styles.card} title="导出文件">
+            <Button onClick={saveFile}>导出文件到桌面</Button>
+          </Card>
+          <Card className={Styles.card} title="打开文件">
+            <div>
+              <Select onChange={getAppPath} style={{ width: 200 }}>
+                {list.map((item) => (
+                  <Select.Option key={item.value}>{item.label}</Select.Option>
+                ))}
+              </Select>
+            </div>
+            <div>下方文件选择默认打开路径：{appPath}</div>
+            <div>
+              <Button onClick={getFilePath}>获取选中文件路径</Button>
+              <div>
+                {selectedFilePath.map((item: any) => (
+                  <div key={item}>{item}</div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          <Card className={Styles.card} title="发送通知">
+            <Button onClick={openNotification}>发送通知</Button>
+          </Card>
+        </div>
       </div>
     </div>
   );

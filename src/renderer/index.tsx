@@ -19,3 +19,10 @@ window.electron.ipcRenderer.on('show-message', (arg: any) => {
   const { type, text } = arg;
   (message as any)[type](text);
 });
+
+window.electron.ipcRenderer.on('log', (arg: any) => {
+  // eslint-disable-next-line no-console
+  console.log(arg);
+  // const { type, text } = arg;
+  // (message as any)[type](text);
+});

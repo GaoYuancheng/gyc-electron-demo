@@ -12,7 +12,8 @@ export type Channels =
   | 'close-app'
   | 'open-closeModal'
   | 'send-notification'
-  | 'show-message';
+  | 'show-message'
+  | 'log';
 
 const electronHandler = {
   // 全局store

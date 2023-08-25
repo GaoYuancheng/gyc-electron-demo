@@ -4,15 +4,21 @@
 - react
 - react-router-dom
 - sass
-- electron-builder
-- electron-updater
-- electron-devtools-installer
+- electron-builder 打包
+- electron-updater 更新监测
+- electron-devtools-installer 插件安装
 - vscode 调试
-- react-refresh
-- electronmon
+- react-refresh renderer 热更新
+- electronmon main.ts 热更新
 
-- electron-store
+- electron-store 资源存在本地
 - antd
+
+### 框架流程
+
+start => ./.erb/configs/webpack.config.renderer.dev.ts => setupMiddlewares => start:preload/start:main => ./.erb/configs/webpack.config.preload/main.dev.ts
+
+package => build => build:main/renderer => ./.erb/configs/webpack.config.main/renderer.prod.ts => electron-builder
 
 ### 实现目标
 

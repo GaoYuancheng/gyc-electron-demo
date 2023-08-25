@@ -60,7 +60,7 @@ const Login: React.FC = () => {
               Submit
             </Button>
           </Form.Item>
-          {/* <Link to="/app1">app1</Link> */}
+          <Link to="/app1">跳过登录1</Link>
         </Form>
       </div>
     </div>
